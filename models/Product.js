@@ -57,7 +57,6 @@ const productSchema = new mongoose.Schema(
   }
 );
 
-// total value of the stock we currently hold for this product
 productSchema.virtual('stockValue').get(function () {
   return this.price * this.quantity;
 });

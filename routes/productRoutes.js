@@ -21,7 +21,6 @@ const {
 
 router.route('/').get(getProducts).post(validateCreate, createProduct);
 
-// these need to be above '/:id' or express will treat "low-stock" as an id
 router.get('/low-stock', getLowStock);
 router.get('/summary', getCategorySummary);
 

@@ -14,7 +14,6 @@ app.get('/', (req, res) => {
 
 app.use('/api/products', productRoutes);
 
-// these two always go last
 app.use(notFound);
 app.use(errorHandler);
 

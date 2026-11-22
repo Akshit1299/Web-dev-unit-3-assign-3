@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 
-// makes sure the :id in the url is a real ObjectId before we hit the db
 const validateId = (req, res, next) => {
   if (!mongoose.isValidObjectId(req.params.id)) {
     return res.status(400).json({ error: 'Invalid product id' });
@@ -18,7 +17,6 @@ const checkNumbers = (body) => {
   return errors;
 };
 
-// POST - all the main fields have to be there
 const validateCreate = (req, res, next) => {
   const errors = [];
   ['name', 'sku', 'category', 'price'].forEach((field) => {
@@ -34,7 +32,6 @@ const validateCreate = (req, res, next) => {
   next();
 };
 
-// PUT - fields are optional but if they are sent they should be the right type
 const validateUpdate = (req, res, next) => {
   if (Object.keys(req.body).length === 0) {
     return res.status(400).json({ error: 'Request body cannot be empty' });
@@ -46,7 +43,6 @@ const validateUpdate = (req, res, next) => {
   next();
 };
 
-// PATCH /:id/stock
 const validateStockChange = (req, res, next) => {
   const { change } = req.body;
   if (!Number.isInteger(change) || change === 0) {

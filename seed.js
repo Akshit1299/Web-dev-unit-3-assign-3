@@ -1,5 +1,4 @@
-// run with: npm run seed
-// clears the products collection and adds some sample data
+
 require('dotenv').config();
 const mongoose = require('mongoose');
 const Product = require('./models/Product');

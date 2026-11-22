@@ -1,19 +1,15 @@
 const Product = require('../models/Product');
 
-// small wrapper so we don't need try/catch in every function
 const asyncHandler = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
 const escapeRegex = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-// POST /api/products
 const createProduct = asyncHandler(async (req, res) => {
   const product = await Product.create(req.body);
   res.status(201).json(product);
 });
 
-// GET /api/products
-// supports ?category= &supplier= &search= &minPrice= &maxPrice= &inStock=true
-// ?sort=-price,name  &page=1 &limit=10
+
 const getProducts = asyncHandler(async (req, res) => {
   const { category, supplier, search, minPrice, maxPrice, inStock, sort } = req.query;
 
@@ -37,10 +33,8 @@ const getProducts = asyncHandler(async (req, res) => {
   if (inStock === 'true') filter.quantity = { $gt: 0 };
   if (inStock === 'false') filter.quantity = 0;
 
-  // sorting - newest first if nothing is given
   const sortBy = sort ? sort.split(',').join(' ') : '-createdAt';
 
-  // pagination
   const page = Math.max(parseInt(req.query.page) || 1, 1);
   const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 100);
   const skip = (page - 1) * limit;
@@ -57,7 +51,6 @@ const getProducts = asyncHandler(async (req, res) => {
   });
 });
 
-// GET /api/products/:id
 const getProductById = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id);
   if (!product) {
@@ -66,7 +59,6 @@ const getProductById = asyncHandler(async (req, res) => {
   res.json(product);
 });
 
-// PUT /api/products/:id
 const updateProduct = asyncHandler(async (req, res) => {
   const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
@@ -78,15 +70,12 @@ const updateProduct = asyncHandler(async (req, res) => {
   res.json(product);
 });
 
-// PATCH /api/products/:id/stock
-// body: { "change": 10 } to restock, { "change": -3 } for a sale
 const adjustStock = asyncHandler(async (req, res) => {
   const { change } = req.body;
   const { id } = req.params;
 
   const filter = { _id: id };
-  // for a sale, only match if there is enough stock. doing it in the query
-  // means two requests at the same time can't push the quantity below zero
+
   if (change < 0) {
     filter.quantity = { $gte: -change };
   }
@@ -108,7 +97,6 @@ const adjustStock = asyncHandler(async (req, res) => {
   res.json({ message: 'Stock updated', product });
 });
 
-// DELETE /api/products/:id
 const deleteProduct = asyncHandler(async (req, res) => {
   const product = await Product.findByIdAndDelete(req.params.id);
   if (!product) {
@@ -117,8 +105,6 @@ const deleteProduct = asyncHandler(async (req, res) => {
   res.json({ message: 'Product deleted', id: product._id });
 });
 
-// GET /api/products/low-stock
-// anything at or below its own reorder level
 const getLowStock = asyncHandler(async (req, res) => {
   const lowStockItems = await Product.aggregate([
     { $match: { $expr: { $lte: ['$quantity', '$reorderLevel'] } } },
@@ -134,8 +120,6 @@ const getLowStock = asyncHandler(async (req, res) => {
   res.json({ count: lowStockItems.length, lowStockItems });
 });
 
-// GET /api/products/summary
-// per category totals
 const getCategorySummary = asyncHandler(async (req, res) => {
   const summary = await Product.aggregate([
     {
